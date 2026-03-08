@@ -4,7 +4,7 @@
 
 ---
 
-## 当前阶段：Phase 4 完成 → Phase 5（云端训练）待开始
+## 当前阶段：Phase 5（云端训练）进行中
 
 ## 总体进度
 
@@ -15,7 +15,7 @@
 | Phase 2 | 模型实现 | 已完成 |
 | Phase 3 | 训练基础设施 | 已完成 |
 | Phase 4 | 评估与推理 | 已完成 |
-| Phase 5 | 云端训练 | 未开始 |
+| Phase 5 | 云端训练 | **进行中** |
 | Phase 6 | 收尾 | 未开始 |
 
 ---
@@ -28,6 +28,19 @@
 | P4-2 Beam Search | 已完成 | beam_size=4，src/utils/inference.py |
 | P4-3 sacrebleu BLEU 评估 | 已完成 | src/utils/bleu.py |
 | P4-4 推理示例脚本 | 已完成 | scripts/evaluate.py |
+
+---
+
+## Phase 5 详情
+
+| 任务 | 状态 | 备注 |
+|---|---|---|
+| P5-1 配置云端实例 | 已完成 | RTX 4090 24G，CUDA 可用 |
+| P5-2 全量数据准备 | 已完成 | opus-100 full，885k train / 1928 val，vocab=32000，保存至 data/processed/full/ |
+| P5-3 混合精度训练 | 已完成 | AMP + grad_accum_steps=2（等效 batch=128），configs/cloud.yaml |
+| P5-4 全量数据训练 | **进行中** | train_cloud.py，TensorBoard → checkpoints/cloud/tb_logs/ |
+| P5-5 训练曲线分析 | 未开始 | — |
+| P5-6 最终权重保存与推理验证 | 未开始 | — |
 
 ---
 
@@ -51,18 +64,29 @@
 
 ---
 
+## 本次 Session 关键修改记录
+
+| 文件 | 修改内容 |
+|---|---|
+| `scripts/prepare_data.py` | 新增 `--full` 模式；HF 缓存改为项目内 `data/raw/hf_cache/` |
+| `configs/cloud.yaml` | 新建云端配置（batch=64, grad_accum=2, AMP, max_seq_len=200）|
+| `src/train/trainer.py` | 新增 AMP、梯度累积、TensorBoard SummaryWriter |
+| `scripts/train_cloud.py` | 新建云端训练脚本，支持 --resume |
+| `src/model/attention.py` | mask fill `-1e9` → `float('-inf')` 修复 AMP fp16 溢出 |
+
+---
+
 ## 当前阻塞 / 待决策
 
-- [ ] 需要决定云端实例类型（A100 / V100）和存储方案
-- [ ] 全量数据集下载方案（WMT17 or 继续用 opus-100 full split）
+无阻塞。训练正在运行中。
 
 ---
 
 ## 下一步行动
 
-**Phase 5：云端训练**
-1. **P5-1** 申请云端 GPU 实例（A100 40G 推荐）
-2. **P5-2** 上传代码 + 数据，或配置数据在线下载
-3. **P5-3** 用 `base.yaml`（d_model=512, 6层, vocab×32000）训练
-4. **P5-4** 启用混合精度（AMP）加速训练
-5. **P5-5** 目标：newstest BLEU ≥ 25
+**Phase 5（进行中）：**
+1. **P5-4** 等待训练完成（30 epochs）
+   - 用 `tail -f` 查看日志
+   - 用 `tensorboard --logdir /root/opt/transformer/reproduct_transformer/checkpoints/cloud/tb_logs` 查看曲线
+2. **P5-5** 训练结束后分析 loss 曲线，判断是否需要调参
+3. **P5-6** 运行 `scripts/evaluate.py --ckpt checkpoints/cloud/best.pt` 做最终 BLEU 评估

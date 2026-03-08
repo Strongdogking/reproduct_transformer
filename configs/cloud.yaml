@@ -1,0 +1,34 @@
+# Cloud training config — RTX 4090 (24GB)
+model:
+  d_model: 512
+  num_heads: 8
+  num_encoder_layers: 6
+  num_decoder_layers: 6
+  d_ff: 2048
+  dropout: 0.1
+  max_seq_len: 200
+  src_vocab_size: 32000   # 中文词表
+  tgt_vocab_size: 32000   # 英文词表
+
+data:
+  src_lang: zh
+  tgt_lang: en
+  src_vocab_size: 32000
+  tgt_vocab_size: 32000
+  train_path: data/processed/full/train
+  val_path: data/processed/full/val
+  src_vocab_path: data/vocab/bpe_zh_full.json
+  tgt_vocab_path: data/vocab/bpe_en_full.json
+
+train:
+  batch_size: 64
+  grad_accum_steps: 2   # 等效 batch_size = 64 × 2 = 128
+  max_epochs: 30
+  warmup_steps: 4000
+  label_smoothing: 0.1
+  grad_clip: 1.0
+  checkpoint_dir: checkpoints/cloud
+  log_interval: 200
+  val_interval: 2000
+  device: auto
+  use_amp: true

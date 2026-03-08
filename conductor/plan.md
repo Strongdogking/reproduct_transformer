@@ -8,7 +8,7 @@
 - [x] **P0-2** 安装本地依赖（PyTorch CPU/MPS、tokenizers、sacrebleu 等）
 - [ ] **P0-3** 生成 `environment.yml` 和 `requirements.txt`
 - [x] **P0-4** 初始化项目目录结构
-- [ ] **P0-5** 配置云端环境（GPU 实例 + CUDA 依赖）
+- [x] **P0-5** 配置云端环境（RTX 4090, CUDA, pip install datasets/tokenizers/sacrebleu）
 
 ---
 
@@ -59,10 +59,10 @@
 
 ## Phase 5: 云端训练
 
-- [ ] **P5-1** 配置云端实例（推荐 A100 40G 或 V100）
-- [ ] **P5-2** 上传数据集 / 配置远程存储
-- [ ] **P5-3** 启用混合精度训练（`torch.cuda.amp`）
-- [ ] **P5-4** 全量数据训练（目标：newstest2017 BLEU ≥ 25）
+- [x] **P5-1** 配置云端实例（RTX 4090 24G）
+- [x] **P5-2** 全量数据准备（opus-100 full, 885k train + 1928 val, vocab=32000, 缓存至 data/raw/hf_cache/）
+- [x] **P5-3** 启用混合精度训练（AMP + 梯度累积 grad_accum_steps=2，等效 batch=128）
+- [ ] **P5-4** 全量数据训练（目标：newstest2017 BLEU ≥ 25）→ 进行中
 - [ ] **P5-5** 训练曲线分析，必要时调整超参数
 - [ ] **P5-6** 保存最终模型权重，推理验证
 

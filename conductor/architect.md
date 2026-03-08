@@ -48,8 +48,9 @@ Input (ZH)                          Output (EN)
 | `num_encoder_layers` | 6 |
 | `num_decoder_layers` | 6 |
 | `dropout` | 0.1 |
-| `max_seq_len` | 512 |
-| `vocab_size` (ZH+EN) | ~32000（BPE 共享词表） |
+| `max_seq_len` | 200（云端实际配置；理论上限 512）|
+| `vocab_size` ZH | 32000（独立 BPE） |
+| `vocab_size` EN | 32000（独立 BPE） |
 
 ---
 
@@ -92,11 +93,11 @@ warmup_steps = 4000
 
 | 项目 | 内容 |
 |---|---|
-| 数据集 | WMT 2017 中英翻译 / OPUS（备选） |
-| 分词 | BPE（Byte Pair Encoding），共享词表 |
-| 词表大小 | ~32000 |
-| 训练集规模 | ~20M 句对 |
-| 验证集 | newstest2017 |
+| 数据集 | Helsinki-NLP/opus-100 en-zh |
+| 分词 | BPE，ZH/EN **独立**词表（非共享） |
+| 词表大小 | ZH: 32000 / EN: 32000 |
+| 训练集规模 | 885,196 句对（清洗后）|
+| 验证集 | opus-100 validation split，1928 句对 |
 | 评估指标 | BLEU score（sacrebleu） |
 
 ---
@@ -135,19 +136,15 @@ reproduct_transformer/
 │       └── checkpoint.py # 模型保存与加载
 │
 ├── configs/
-│   ├── base.yaml         # 默认超参数配置
-│   └── cloud.yaml        # 云端训练配置（CUDA）
+│   ├── debug.yaml        # 本地调试（d_model=128, 2层, 10k数据）
+│   ├── base.yaml         # 全量基础配置（d_model=512, 6层）
+│   └── cloud.yaml        # 云端训练配置（batch=64, AMP, grad_accum=2）
 │
 ├── scripts/
-│   ├── prepare_data.sh   # 数据下载与预处理
-│   ├── train_local.sh    # 本地调试训练脚本
-│   └── train_cloud.sh    # 云端 GPU 训练脚本
-│
-├── notebooks/
-│   └── demo.ipynb        # 推理演示
-│
-├── requirements.txt      # pip 依赖
-└── environment.yml       # conda 环境导出
+│   ├── prepare_data.py   # 数据准备（--debug 10k / --full 全量）
+│   ├── train_local.py    # 本地调试训练脚本
+│   ├── train_cloud.py    # 云端 GPU 训练脚本（支持 --resume）
+│   └── evaluate.py       # 推理评估（greedy / beam search）
 ```
 
 ---
@@ -156,8 +153,8 @@ reproduct_transformer/
 
 | 环境 | 设备 | 用途 |
 |---|---|---|
-| 本地 Mac（Apple Silicon） | CPU / MPS | 代码开发、小规模调试 |
-| 云端（A100 / V100） | CUDA GPU | 完整数据集训练 |
+| 本地 Mac（Apple Silicon） | CPU / MPS | 代码开发、小规模调试（debug.yaml）|
+| 云端（RTX 4090 24G） | CUDA GPU | 完整数据集训练（cloud.yaml）|
 
 - 本地调试使用小数据子集（如 10k 句对）
 - `configs/base.yaml` 中通过 `device: auto` 自动选择设备
