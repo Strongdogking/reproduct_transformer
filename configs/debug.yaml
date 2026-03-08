@@ -1,0 +1,32 @@
+# Small model config for local debug validation
+model:
+  d_model: 128
+  num_heads: 4
+  num_encoder_layers: 2
+  num_decoder_layers: 2
+  d_ff: 256
+  dropout: 0.1
+  max_seq_len: 128
+  src_vocab_size: 8000   # 中文词表
+  tgt_vocab_size: 8000   # 英文词表
+
+data:
+  src_lang: zh
+  tgt_lang: en
+  src_vocab_size: 8000
+  tgt_vocab_size: 8000
+  train_path: data/processed/debug_10k/train
+  val_path: data/processed/debug_10k/val
+  src_vocab_path: data/vocab/bpe_zh_debug.json
+  tgt_vocab_path: data/vocab/bpe_en_debug.json
+
+train:
+  batch_size: 16
+  max_epochs: 5
+  warmup_steps: 400
+  label_smoothing: 0.1
+  grad_clip: 1.0
+  checkpoint_dir: checkpoints/debug
+  log_interval: 50
+  val_interval: 200
+  device: auto

@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+checkpoints/
+data/raw/
+data/processed/
+data/vocab/
+*.bin
+*.pt
+.DS_Store
