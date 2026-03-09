@@ -60,14 +60,33 @@ def translate(text, model, zh_tok, en_tok, device, method="beam", beam_size=4, m
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default=None,
+                        help="配置文件路径，默认根据 --ckpt 自动推断")
     parser.add_argument("--method",  default="beam", choices=["greedy", "beam"])
     parser.add_argument("--beam_size", type=int, default=4)
     parser.add_argument("--samples",   type=int, default=None,
                         help="评估多少条验证集（None=全部，慢；建议先用200）")
-    parser.add_argument("--ckpt", default="checkpoints/debug/best.pt")
+    parser.add_argument("--ckpt", default=None,
+                        help="checkpoint 路径，默认自动选最佳可用")
     args = parser.parse_args()
 
-    with open("configs/debug.yaml") as f:
+    # 自动推断 config 和 ckpt
+    if args.ckpt is None:
+        if os.path.exists("checkpoints/cloud/best.pt"):
+            args.ckpt = "checkpoints/cloud/best.pt"
+        else:
+            args.ckpt = "checkpoints/debug/best.pt"
+
+    if args.config is None:
+        if "cloud" in args.ckpt:
+            args.config = "configs/cloud.yaml"
+        else:
+            args.config = "configs/debug.yaml"
+
+    print(f"Config : {args.config}")
+    print(f"Ckpt   : {args.ckpt}")
+
+    with open(args.config) as f:
         cfg = yaml.safe_load(f)
 
     device = get_device()
@@ -100,6 +119,8 @@ def main():
         "我爱机器学习。",
         "今天天气很好。",
         "他们在公园里散步。",
+        '我想说的是，在坐的都是废物。',
+        '导演这一次，我要打十个！'
     ]
     print(f"\n{'='*60}")
     print(f"单句翻译演示（method={args.method}）")

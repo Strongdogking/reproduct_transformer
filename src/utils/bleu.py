@@ -1,7 +1,20 @@
 """P4-3: 计算验证集 BLEU 分数（使用 sacrebleu）。"""
+import re
 import torch
 import sacrebleu
 from src.utils.inference import greedy_decode, beam_search
+
+
+def detokenize_en(text):
+    """BPE decode 后的简单后处理，恢复英文标点和缩写。"""
+    # 去掉标点前的空格：word . → word.
+    text = re.sub(r'\s+([.,!?;:\)])', r'\1', text)
+    # 去掉左括号后的空格
+    text = re.sub(r'(\()\s+', r'\1', text)
+    # 修复英文缩写：don ' t → don't, I ' m → I'm
+    text = re.sub(r"\s'\s*(s|t|re|ve|ll|d|m|S|T|Re|Ve|Ll|D|M)\b", r"'\1", text)
+    # 去掉行首尾多余空格
+    return text.strip()
 
 
 @torch.no_grad()
@@ -42,8 +55,8 @@ def evaluate_bleu(model, dataloader, en_tokenizer, device,
             pred_ids = [t for t in pred_ids if t not in (0, 2, 3)]
             ref_ids  = [t for t in ref_ids  if t not in (0, 2, 3)]
 
-            hypotheses.append(en_tokenizer.decode(pred_ids))
-            references.append(en_tokenizer.decode(ref_ids))
+            hypotheses.append(detokenize_en(en_tokenizer.decode(pred_ids)))
+            references.append(detokenize_en(en_tokenizer.decode(ref_ids)))
 
             n += 1
             if max_samples and n >= max_samples:

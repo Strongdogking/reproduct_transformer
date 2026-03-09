@@ -125,6 +125,21 @@ class Trainer:
             self.writer.add_scalar("train/loss_epoch", train_loss, epoch)
             self.writer.flush()
 
+            # 每 epoch 保存 last.pt（断点续训用）
+            save_checkpoint(
+                self.model, self.optimizer, self.scheduler,
+                epoch, self.global_step, val_loss,
+                path=os.path.join(ckpt_dir, "last.pt"),
+            )
+
+            # 每 5 epoch 保存带编号快照
+            if epoch % 5 == 0:
+                save_checkpoint(
+                    self.model, self.optimizer, self.scheduler,
+                    epoch, self.global_step, val_loss,
+                    path=os.path.join(ckpt_dir, f"epoch_{epoch:03d}.pt"),
+                )
+
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 save_checkpoint(

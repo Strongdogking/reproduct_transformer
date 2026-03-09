@@ -7,13 +7,13 @@ model:
   d_ff: 2048
   dropout: 0.1
   max_seq_len: 200
-  src_vocab_size: 32000   # 中文词表
+  src_vocab_size: 16000   # 中文词表（从32000降至16000，减少过拟合）
   tgt_vocab_size: 32000   # 英文词表
 
 data:
   src_lang: zh
   tgt_lang: en
-  src_vocab_size: 32000
+  src_vocab_size: 16000
   tgt_vocab_size: 32000
   train_path: data/processed/full/train
   val_path: data/processed/full/val

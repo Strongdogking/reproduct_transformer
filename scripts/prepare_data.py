@@ -184,7 +184,7 @@ def prepare_full(src_vocab_size=32000, tgt_vocab_size=32000,
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true", help="Prepare 10k debug subset")
-    parser.add_argument("--full", action="store_true", help="Prepare full dataset (vocab=32000)")
+    parser.add_argument("--full", action="store_true", help="Prepare full dataset")
     parser.add_argument("--n", type=int, default=10000)
     parser.add_argument("--src_vocab_size", type=int, default=8000)
     parser.add_argument("--tgt_vocab_size", type=int, default=8000)
@@ -195,6 +195,7 @@ if __name__ == "__main__":
                       src_vocab_size=args.src_vocab_size,
                       tgt_vocab_size=args.tgt_vocab_size)
     elif args.full:
-        prepare_full()
+        prepare_full(src_vocab_size=args.src_vocab_size,
+                     tgt_vocab_size=args.tgt_vocab_size)
     else:
         print("Use --debug for 10k subset, or --full for full training data.")
